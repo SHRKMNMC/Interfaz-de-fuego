@@ -14,7 +14,6 @@ public class ModeloLlama {
         this.alto = alto;
         temperatura = new int[alto][ancho];
         paleta = PaletaFuego.generarPaleta();
-
     }
 
     public int getAncho() { return ancho; }
@@ -24,69 +23,54 @@ public class ModeloLlama {
     public void set(int y, int x, int v) { temperatura[y][x] = v; }
 
     // CHISPA INICIAL
-
     public void encenderBase() {
         for (int x = 0; x < ancho; x++)
             temperatura[alto - 1][x] = 1023;
     }
 
-    //BASE
-
+    // BASE con puntos calientes y fríos
     private void actualizarBase() {
-
         int y = alto - 1;
 
         for (int x = 0; x < ancho; x++) {
 
-            // base estable y caliente
-            int base = 1023;
+            int t;
 
-            // ruido moderado, más suave
-            int ruido = (int)(Math.random() * 50) + 100;  // -160 a +100
+            double prob = Math.random();
 
-            int t = base + ruido;
-
-            // CHISPAS FUERTES EXTREMADAMENTE RARAS
-            // antes 0.006 ahora 0.002 CUIDADO
-            if (Math.random() < 0.000000001)
+            if (prob < 0.29) {
+                // 10% probabilidad de punto frío
+                t = (int)(Math.random() * 200); // frío
+            } else if (prob < 0.20) {
+                // 5% probabilidad de chispa máxima
                 t = 1023;
-
-            // huecos frios para darle forma de flama
-            if (Math.random() < 0.49)   // antes 0.008
-                t = (int)(Math.random() * 350);
+            } else {
+                // resto base caliente
+                t = 600 + (int)(Math.random() * 200); // base caliente
+            }
 
             // límites
+            if (t > 1023) t = 1023;
             if (t < 0) t = 0;
-            else if (t > 1023) t = 1023;
 
             temperatura[y][x] = t;
         }
     }
 
-    // LÓGICA DE PROPAGACIÓN SE MANTIENE
-
+    // Propagación determinista
     public void propagar() {
-
         actualizarBase();
 
         int fireWidth = ancho;
         int fireHeight = alto;
 
         for (int actualRow = fireHeight - 2; actualRow > 4; actualRow--) {
-
-            int iniRow = actualRow * fireWidth;
-            int iniBelowRow = iniRow + fireWidth;
-
             for (int actualCol = 2; actualCol < fireWidth - 2; actualCol++) {
 
-                int pos = iniRow + actualCol;
-                int posBelow = iniBelowRow + actualCol;
-
-                int y = pos / fireWidth;
-                int x = pos % fireWidth;
-
-                int yB = posBelow / fireWidth;
-                int xB = posBelow % fireWidth;
+                int y = actualRow;
+                int x = actualCol;
+                int yB = y + 1;
+                int xB = x;
 
                 int tL = temperatura[y][x - 1];
                 int tC = temperatura[y][x];
@@ -105,13 +89,9 @@ public class ModeloLlama {
                                 (bR * 0.7)
                 ) / 5.98569;
 
-                calc -= 0.8;
+                calc -= 3; // enfriamiento fijo
 
                 int nuevo = (int) calc;
-
-                // ENFRIAMIENTO
-                int enf = (int)(Math.random() * 10);
-                nuevo -= enf;
 
                 if (nuevo < 0) nuevo = 0;
                 else if (nuevo > 1023) nuevo = 1023;
@@ -126,25 +106,19 @@ public class ModeloLlama {
 
         for (int y = 0; y < alto; y++) {
             for (int x = 0; x < ancho; x++) {
-                float v = temperatura[y][x] / 1023f;
+                int temp = temperatura[y][x];
 
-                if (v <= 0) {
+                if (temp <= 0) {
                     buffer[y][x] = 0x00FFFFFF;
                     continue;
                 }
 
-                float idxFloat = v * (paleta.length - 1);
-                int idx = (int) Math.floor(idxFloat);
-                int next = Math.min(idx + 1, paleta.length - 1);
-                float f = idxFloat - idx;
+                Color c = paleta[temp];
 
-                Color c1 = paleta[idx];
-                Color c2 = paleta[next];
-
-                int r = (int)(c1.getRed()   + f*(c2.getRed()   - c1.getRed()));
-                int g = (int)(c1.getGreen() + f*(c2.getGreen() - c1.getGreen()));
-                int b = (int)(c1.getBlue()  + f*(c2.getBlue()  - c1.getBlue()));
-                int a = (int)(c1.getAlpha() + f*(c2.getAlpha() - c1.getAlpha()));
+                int r = c.getRed();
+                int g = c.getGreen();
+                int b = c.getBlue();
+                int a = c.getAlpha();
 
                 buffer[y][x] = (a << 24) | (r << 16) | (g << 8) | b;
             }
