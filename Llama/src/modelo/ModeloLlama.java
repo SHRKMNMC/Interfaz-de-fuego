@@ -38,7 +38,7 @@ public class ModeloLlama {
 
             double prob = Math.random();
 
-            if (prob < 0.29) {
+            if (prob < 0.33) {
                 // 10% probabilidad de punto frío
                 t = (int)(Math.random() * 200); // frío
             } else if (prob < 0.20) {
@@ -57,7 +57,7 @@ public class ModeloLlama {
         }
     }
 
-    // Propagación determinista
+    // PROPAGACION
     public void propagar() {
         actualizarBase();
 
@@ -89,7 +89,7 @@ public class ModeloLlama {
                                 (bR * 0.7)
                 ) / 5.98569;
 
-                calc -= 3;
+                calc -= 2;
                 int nuevo = (int) calc;
 
                 if (nuevo < 0) nuevo = 0;

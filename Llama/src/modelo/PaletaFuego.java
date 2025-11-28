@@ -10,7 +10,7 @@ public class PaletaFuego {
         int numTemperaturas = 1024; // 0..1023
         Color[] paleta = new Color[numTemperaturas];
 
-        // stops y colores base
+        // Colores base y porcentajes de rangos color-temperadura
         final float[] stops = {0.00f, 0.30f, 0.40f, 0.45f, 0.50f, 0.53f, 1.00f};
         final Color[] colors = {
                 new Color(0, 0, 0, 0),

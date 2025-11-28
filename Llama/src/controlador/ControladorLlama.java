@@ -17,7 +17,7 @@ public class ControladorLlama {
 
         modelo.encenderBase();
 
-        new Timer(50, (ActionEvent e) -> tick()).start();
+        new Timer(30, (ActionEvent e) -> tick()).start();
     }
 
     private void tick() {
