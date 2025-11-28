@@ -40,7 +40,7 @@ public class PaletaFuego {
             // Valor local entre estos dos stops (0..1)
             float porcentajeLocal = (porcentajeGlobal - stopInicio) / (stopFin - stopInicio);
 
-            // Suavizado 
+            // Suavizado
             float porcentajeSuavizado = porcentajeLocal * porcentajeLocal * (3 - 2 * porcentajeLocal);
 
             Color colorInicio = coloresBase[idx];
@@ -58,4 +58,3 @@ public class PaletaFuego {
         return paleta;
     }
 }
-
