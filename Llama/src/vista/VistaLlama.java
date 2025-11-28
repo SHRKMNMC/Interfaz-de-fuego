@@ -16,6 +16,7 @@ public class VistaLlama extends JFrame {
         add(panel);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
         setVisible(true);
     }
 

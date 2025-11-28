@@ -89,8 +89,7 @@ public class ModeloLlama {
                                 (bR * 0.7)
                 ) / 5.98569;
 
-                calc -= 3; // enfriamiento fijo
-
+                calc -= 3;
                 int nuevo = (int) calc;
 
                 if (nuevo < 0) nuevo = 0;
