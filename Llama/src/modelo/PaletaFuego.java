@@ -6,47 +6,53 @@ public class PaletaFuego {
 
     public static Color[] generarPaleta() {
 
-        int numTemperaturas = 1024; // 0..1023
-        Color[] paleta = new Color[numTemperaturas];
+        int totalNiveles = 1024;  // Número de temperaturas (0..1023)
+        Color[] paleta = new Color[totalNiveles];
 
-        // Colores base y porcentajes de rangos color-temperatura
+        // Puntos de corte dentro del rango 0..1 del gradiente
         final float[] stops = {0.00f, 0.30f, 0.40f, 0.45f, 0.50f, 0.53f, 1.00f};
-        final Color[] colors = {
-                new Color(0, 0, 0, 0),
-                new Color(39, 39, 39, 0),
-                new Color(67, 10, 3, 60),
-                new Color(255, 120, 20, 180),
-                new Color(255, 200, 40, 210),
-                new Color(255, 240, 180, 235),
-                new Color(220, 230, 255, 140)
+
+        // Colores asociados a cada stop
+        final Color[] coloresBase = {
+                new Color(0, 0, 0, 0),          // total oscuridad
+                new Color(39, 39, 39, 0),       // gris oscuro
+                new Color(67, 10, 3, 60),       // rojo muy oscuro
+                new Color(255, 120, 20, 180),   // naranja intenso
+                new Color(255, 200, 40, 210),   // amarillo cálido
+                new Color(255, 240, 180, 235),  // amarillo muy claro
+                new Color(220, 230, 255, 140)   // luz azulada suave
         };
 
-        for (int i = 0; i < numTemperaturas; i++) {
+        for (int nivel = 0; nivel < totalNiveles; nivel++) {
 
-            float t = i / (float) (numTemperaturas - 1);
+            // Valor normalizado del nivel (0..1)
+            float porcentajeGlobal = nivel / (float) (totalNiveles - 1);
 
+            // Determinar entre qué dos stops estamos
             int idx = 0;
-            while (idx < stops.length - 1 && t > stops[idx + 1])
+            while (idx < stops.length - 1 && porcentajeGlobal > stops[idx + 1]) {
                 idx++;
+            }
 
-            float t0 = stops[idx];
-            float t1 = stops[idx + 1];
+            float stopInicio = stops[idx];
+            float stopFin = stops[idx + 1];
 
-            float local = (t - t0) / (t1 - t0);
+            // Valor local entre estos dos stops (0..1)
+            float porcentajeLocal = (porcentajeGlobal - stopInicio) / (stopFin - stopInicio);
 
-            //Suavizado de la transición
-            float s = local * local * (3 - 2 * local);
+            // Suavizado tipo smoothstep
+            float porcentajeSuavizado = porcentajeLocal * porcentajeLocal * (3 - 2 * porcentajeLocal);
 
-            Color c0 = colors[idx];
-            Color c1 = colors[idx + 1];
+            Color colorInicio = coloresBase[idx];
+            Color colorFin = coloresBase[idx + 1];
 
-            // Cálculo del gradiente
-            int r = (int) (c0.getRed()   + (c1.getRed()   - c0.getRed())   * s);
-            int g = (int) (c0.getGreen() + (c1.getGreen() - c0.getGreen()) * s);
-            int b = (int) (c0.getBlue()  + (c1.getBlue()  - c0.getBlue())  * s);
-            int a = (int) (c0.getAlpha() + (c1.getAlpha() - c0.getAlpha()) * s);
+            // Interpolación de colores
+            int r = (int) (colorInicio.getRed()   + (colorFin.getRed()   - colorInicio.getRed())   * porcentajeSuavizado);
+            int g = (int) (colorInicio.getGreen() + (colorFin.getGreen() - colorInicio.getGreen()) * porcentajeSuavizado);
+            int b = (int) (colorInicio.getBlue()  + (colorFin.getBlue()  - colorInicio.getBlue())  * porcentajeSuavizado);
+            int a = (int) (colorInicio.getAlpha() + (colorFin.getAlpha() - colorInicio.getAlpha()) * porcentajeSuavizado);
 
-            paleta[i] = new Color(r, g, b, a);
+            paleta[nivel] = new Color(r, g, b, a);
         }
 
         return paleta;
